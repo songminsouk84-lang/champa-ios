@@ -1,0 +1,56 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Build Unsigned iOS App
+        run: |
+          xcodebuild -project "Champa.xcodeproj" \
+            -scheme "Champa" \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CONFIGURATION_BUILD_DIR=build_out \
+            build
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r "build_out/Champa.app" Payload/
+          zip -r "Champa.ipa" Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: com.champa.app-ipa
+          path: Champa.ipa
+
+      - name: Publish Direct Download IPA Release
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ github.run_number }}-${{ github.run_id }}" "Champa.ipa" \
+            --title "Champa iOS v1.0.0 (Build #${{ github.run_number }})" \
+            --notes "Unsigned iOS IPA compiled automatically by Web2App Studio Cloud Build (Install via Sideloadly / AltStore / TrollStore)"

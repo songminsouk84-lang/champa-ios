@@ -1,0 +1,21 @@
+name: Champa
+options:
+  bundleIdPrefix: com.champa.app
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  Champa:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.champa.app
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "179534250"
+        INFOPLIST_FILE: Sources/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1,2"
